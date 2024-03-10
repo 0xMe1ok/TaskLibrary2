@@ -541,7 +541,7 @@
             // 
             // dataGridViewAuthors
             // 
-            dataGridViewAuthors.BackgroundColor = Color.RoyalBlue;
+            dataGridViewAuthors.BackgroundColor = Color.LightBlue;
             dataGridViewAuthors.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewAuthors.Location = new Point(251, 50);
             dataGridViewAuthors.Name = "dataGridViewAuthors";

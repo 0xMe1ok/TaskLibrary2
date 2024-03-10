@@ -504,6 +504,7 @@ namespace TaskLibrary2
                         context.SaveChanges();
 
                         RefreshClients();
+                        RefreshBookOrders();
                         MessageBox.Show("Клиент был добавлен!");
                     }
                     else
@@ -605,7 +606,8 @@ namespace TaskLibrary2
                     context.SaveChanges();
 
                     RefreshAuthors();
-
+                    RefreshBooks();
+                    RefreshBookOrders();
 
                     MessageBox.Show("Успешно удалены выбранные авторы!");
                 }
@@ -630,8 +632,6 @@ namespace TaskLibrary2
 
                     Libraries libNumber = new Libraries();
                     libNumber.LibraryId = (int)numericUpDownLibraryNumber.Value;
-                    if (context.Libraries.Count() > 0)
-                        libNumber.Id = context.Books.OrderByDescending(c => c.Id).FirstOrDefault().Id + 1;
 
                     if (!context.Libraries.Any(o => o.Id == library.Id ||
                                                     o.Address == library.Address &&
@@ -802,8 +802,8 @@ namespace TaskLibrary2
                             var title = book.Title;
                             var authorId = book.AuthorId;
 
-                            var excludedIDs = new HashSet<int>(context.BookOrders.Select(c => c.Id));
-                            var books = context.Books.Where(c => (!excludedIDs.Contains(c.Id)) && c.Title == title && c.AuthorId == authorId && c.LibraryId == libNumber).Take(count);
+                            var excludedIDs = context.BookOrders.Select(x => x.BookId).ToList();
+                            var books = context.Books.Where(x => !excludedIDs.Contains(x.Id) && (x.Title == title && x.AuthorId == authorId)).ToList().Take(count);
 
                             context.Books.RemoveRange(books);
                             context.SaveChanges();
@@ -910,8 +910,17 @@ namespace TaskLibrary2
                     bookOrder.DateOfOrder = DateTime.Now;
                     bookOrder.DateOfReturn = DateTime.Now.AddDays(daysOfOrder);
 
-                    if (!context.BookOrders.Any(o => o.ClientId == bookOrder.ClientId &&
-                                                   o.BookId == bookOrder.BookId))
+                    var clientBooks = (from Book in context.Books
+                                       where (context.BookOrders.Where(x => x.ClientId == bookOrder.ClientId).Select(x => x.BookId).ToList().Contains(Book.Id))
+                                       select new 
+                                       {
+                                           Название = Book.Title,
+                                           Автор = Book.AuthorId
+                                       }).AsNoTracking().ToList();
+
+                    var bookToOrder = context.Books.ToList().First(x => x.Id == bookOrder.BookId);
+
+                    if (!clientBooks.Any(o => o.Название == bookToOrder.Title && o.Автор == bookToOrder.AuthorId))
                     {
                         context.BookOrders.Add(bookOrder);
                         context.SaveChanges();

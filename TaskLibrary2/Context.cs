@@ -17,7 +17,7 @@ namespace TaskLibrary2
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(@"host=localhost;port=5432;database=TaskLibrary2;username=postgres;password=meowmurrmeowMEOWsrsly");
+            optionsBuilder.UseNpgsql(@"host=localhost;port=5432;database=TaskLibrary2;username=user;password=pass");
         }
 
         public DbSet<Client> Clients { get; set; }
